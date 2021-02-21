@@ -1,4 +1,4 @@
-from clparser import CmdIR
+from .clparser import CmdIR
 
 # [(a, 1)] |- $a => 1
 # [(a, 1)] |- "$a" => 1

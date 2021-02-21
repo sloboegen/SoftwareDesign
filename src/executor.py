@@ -1,4 +1,4 @@
-from clparser import CmdIR
+from .clparser import CmdIR
 import io
 import os
 
@@ -96,5 +96,7 @@ def runCommand(cmds: list[CmdIR]) -> io.StringIO:
 
     for cmd in cmdsExec:
         result = cmd.execute(result)
+
+    result.write('\n')
 
     return result
