@@ -27,8 +27,8 @@ class VarDecl:
 
 
 def checkDecl(line: str) -> bool:
-    # declRe = re.compile('[A-Za-z][A-Za-z0-9]+=[A-Za-z0-9]+$')
-    return '=' in line
+    declRe = re.compile(r'[A-Za-z]\w*=\w+$')
+    return bool(declRe.match(line))
 
 
 def parseDecl(line: str) -> VarDecl:
