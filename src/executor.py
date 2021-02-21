@@ -1,5 +1,6 @@
 from clparser import CmdIR
 import io
+import os
 
 # TODO
 # stream = io.StringIO() <=> stream.truncate(0); stream.seek(0)
@@ -32,7 +33,7 @@ class PwdExecutor(CmdExecutor):
 
     def execute(self, stream: io.StringIO) -> io.StringIO:
         stream = io.StringIO()
-        stream.write('This is output of pwd')
+        stream.write(os.getcwd())
         return stream
 
 
@@ -64,10 +65,9 @@ class WcExecutor(CmdExecutor):
                 lineCnt += 1
                 wordCnt += len(line.split())
                 charCnt += len(line)
-        
+
         stream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
         return stream
-
 
 
 def processCmd(cmd: CmdIR) -> CmdExecutor:
