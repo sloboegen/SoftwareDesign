@@ -155,7 +155,7 @@ class ExternalTestCase(CmdTestCase):
         return result.stdout.decode('utf-8').rstrip()
 
     def test_cowsay(self):
-        cmd = [f'cowsay privetiki']
+        cmd = ['cowsay privetiki']
         gold = self.getExternalResult('cowsay', 'privetiki')
         self.assertCmdResult(cmd, gold)
 
