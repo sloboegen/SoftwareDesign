@@ -36,3 +36,12 @@ jobs:
     - name: Expanser Test
       run: |
         python -m unittest tests/test_expansion.py
+    - name: 'generate report'
+      run: |
+        pip install coverage
+        coverage run -m unittest
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-actions@v1
+      with:
+        flags: unittests
+        fail_ci_if_error: true
