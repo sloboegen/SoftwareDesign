@@ -1,5 +1,6 @@
 import unittest
 import os
+import subprocess
 
 from io import StringIO
 from src.session import Session
@@ -137,7 +138,7 @@ class WcTestCase(CmdTestCase):
     def test_byte(self):
         p = self._getCorrectPath('/files/bytes')
         cmd = [f'wc {p}']
-    
+
         self.assertCmdResult(cmd, f'1 200 1168 {p}')
 
     def test_lines(self):
@@ -145,3 +146,14 @@ class WcTestCase(CmdTestCase):
         cmd = [f'wc {p}']
 
         self.assertCmdResult(cmd, f'6 0 6 {p}')
+
+
+class ExternalTestCase(CmdTestCase):
+    def getExternalResult(self, name: str, args: str):
+        result = subprocess.run([name, args], stdout=subprocess.PIPE)
+        return result.stdout.decode('utf-8').rstrip()
+
+    def test_cowsay(self):
+        cmd = [f'cowsay privetiki']
+        gold = self.getExternalResult('cowsay', 'privetiki')
+        self.assertCmdResult(cmd, gold)

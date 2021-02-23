@@ -1,6 +1,7 @@
 from .clparser import CmdIR
 import io
 import os
+import subprocess
 
 
 class CmdExecutor(object):
@@ -117,6 +118,19 @@ class WcExecutor(CmdExecutor):
         return ostream
 
 
+class ExternalExecutor(CmdExecutor):
+    def __init__(self, cmd: CmdIR) -> None:
+        super().__init__(cmd)
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+
+        result = subprocess.run([self.name, self.args], stdout=subprocess.PIPE)
+        ostream.write(result.stdout.decode('utf-8'))
+
+        return ostream
+
+
 def processCmd(cmd: CmdIR) -> CmdExecutor:
     """
     Map the command to its executor
@@ -147,9 +161,7 @@ def processCmd(cmd: CmdIR) -> CmdExecutor:
     if name == 'wc':
         return WcExecutor(cmd)
 
-    # TODO: unknown command
-    print('Unknown command')
-    raise NotImplementedError
+    return ExternalExecutor(cmd)
 
 
 def runCommand(cmds: list[CmdIR]) -> io.StringIO:
