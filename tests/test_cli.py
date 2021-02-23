@@ -60,6 +60,10 @@ class EchoTestCase(CmdTestCase):
         cmd = ['a=echo', 'b=abc', '$a $b']
         self.assertCmdResult(cmd, 'abc')
 
+    def test_variables6(self):
+        cmd = ['a==', 'echo $a']
+        self.assertCmdResult(cmd, '=')
+
     def test_quotes1(self):
         cmd = ['echo \'abc\'']
         self.assertCmdResult(cmd, 'abc')
@@ -79,6 +83,10 @@ class EchoTestCase(CmdTestCase):
     def test_quotes5(self):
         cmd = ['a=1', 'b=2', 'echo \'$a $b\'']
         self.assertCmdResult(cmd, '$a $b')
+
+    def test_quotes6(self):
+        cmd = ['a=\'!\'', 'echo $a']
+        self.assertCmdResult(cmd, '!')
 
     def test_pipes1(self):
         cmd = ['echo 42 | echo']
