@@ -157,3 +157,11 @@ class ExternalTestCase(CmdTestCase):
         cmd = [f'cowsay privetiki']
         gold = self.getExternalResult('cowsay', 'privetiki')
         self.assertCmdResult(cmd, gold)
+
+    def test_read_file(self):
+        cmd = ['touch file.txt',
+               'echo 42 | tee file.txt',
+               'cat file.txt']
+        self.assertCmdResult(cmd, '42')
+
+        subprocess.run(['rm', 'file.txt'])  # delete created file
