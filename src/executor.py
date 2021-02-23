@@ -15,8 +15,6 @@ class CmdExecutor(object):
         name (str): the command name
         args (list): the command args
 
-    TODO: rewrite with `return code` and get in-out streams
-
     """
 
     def __init__(self, cmd: CmdIR) -> None:
