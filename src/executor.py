@@ -2,9 +2,6 @@ from .clparser import CmdIR
 import io
 import os
 
-# TODO
-# stream = io.StringIO() <=> stream.truncate(0); stream.seek(0)
-
 
 class CmdExecutor(object):
     """
@@ -25,12 +22,12 @@ class CmdExecutor(object):
         self.name = cmd.name
         self.args = cmd.args
 
-    def execute(self, stream: io.StringIO) -> io.StringIO:
+    def execute(self, istream: io.StringIO) -> io.StringIO:
         """
         Execute the command
 
         Args:
-            stream (io.StringIO): input stream
+            istream (io.StringIO): input stream
 
         Returns:
             io.StringIO: output stream with the result of execution
@@ -49,10 +46,10 @@ class EchoExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    def execute(self, stream: io.StringIO) -> io.StringIO:
-        stream = io.StringIO()
-        stream.write(self.args)
-        return stream
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+        ostream.write(self.args)
+        return ostream
 
 
 class PwdExecutor(CmdExecutor):
@@ -65,10 +62,10 @@ class PwdExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    def execute(self, stream: io.StringIO) -> io.StringIO:
-        stream = io.StringIO()
-        stream.write(os.getcwd())
-        return stream
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+        ostream.write(os.getcwd())
+        return ostream
 
 
 class CatExecutor(CmdExecutor):
@@ -81,14 +78,14 @@ class CatExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    def execute(self, stream: io.StringIO) -> io.StringIO:
-        stream = io.StringIO()
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
         assert len(self.args.split()) == 1, "Only one file"
         filename: str = self.args
         with open(filename) as f:
-            stream.write(f.read())
+            ostream.write(f.read())
 
-        return stream
+        return ostream
 
 
 class WcExecutor(CmdExecutor):
@@ -101,8 +98,8 @@ class WcExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    def execute(self, stream: io.StringIO) -> io.StringIO:
-        stream = io.StringIO()
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
 
         assert len(self.args.split()) == 1, "Only one file"
 
@@ -116,8 +113,8 @@ class WcExecutor(CmdExecutor):
                 wordCnt += len(line.split())
                 charCnt += len(line)
 
-        stream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
-        return stream
+        ostream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
+        return ostream
 
 
 def processCmd(cmd: CmdIR) -> CmdExecutor:
