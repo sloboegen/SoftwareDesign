@@ -7,7 +7,7 @@ from .clparser import parsePipes, VarDecl
 class Session():
     """
     This class is responsible for current session.
-    It holds an environment (map the variable name to its value)  
+    It holds an environment (map the variable name to its value)
 
     Attributes:
         state (dict[str, str]): map the variable name to its value

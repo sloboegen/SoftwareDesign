@@ -46,9 +46,7 @@ class EchoExecutor(CmdExecutor):
 
     def execute(self, stream: io.StringIO) -> io.StringIO:
         stream = io.StringIO()
-
-        argsStr = ''.join(self.args)
-        stream.write(argsStr)
+        stream.write(self.args)
         return stream
 
 
@@ -68,7 +66,8 @@ class CatExecutor(CmdExecutor):
 
     def execute(self, stream: io.StringIO) -> io.StringIO:
         stream = io.StringIO()
-        filename: str = self.args[0]
+        assert len(self.args.split()) == 1, "Only one file"
+        filename: str = self.args
         with open(filename) as f:
             stream.write(f.read())
 
@@ -81,7 +80,10 @@ class WcExecutor(CmdExecutor):
 
     def execute(self, stream: io.StringIO) -> io.StringIO:
         stream = io.StringIO()
-        filename: str = self.args[0]
+
+        assert len(self.args.split()) == 1, "Only one file"
+
+        filename: str = self.args
 
         lineCnt, wordCnt, charCnt = 0, 0, 0
 

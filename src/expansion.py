@@ -27,6 +27,7 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
         "$a"
         >>> expansion(CmdIR('echo $a'), {})
         empty-string
+
     """
 
     inSingleQuote: bool
