@@ -36,15 +36,18 @@ jobs:
     - name: Expanser Test
       run: |
         python -m unittest tests/test_expansion.py
-    # - name: 'generate report'
-    #   run: |
-    #     pip install coverage
-    #     pip install codecov
-    #     python -m coverage run -m unittest
-    #     python -m codecov
-    # - name: Upload coverage to Codecov
-    #   uses: codecov/codecov-action@v1.0.7
-    #   with:
-    #     token: ${{ secrets.CODECOV_TOKEN }}
-    #     flags: unittests
-    #     fail_ci_if_error: true
+    - name: 'generate report'
+      run: |
+        pip install coverage
+        pip install codecov
+        python -m coverage run -m unittest
+        python -m codecov
+    - name: Upload token to Codecov
+      run: |
+        bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1.0.7
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        fail_ci_if_error: true
