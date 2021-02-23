@@ -1,0 +1,36 @@
+name: Coverage
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: 'generate report'
+      run: |
+        # for testing external process
+        sudo apt-get install -y cowsay
+        pip install coverage
+        pip install codecov
+        python -m coverage run -m unittest
+        python -m codecov
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1.0.7
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        fail_ci_if_error: true
+        MINIMUM_COVERAGE: 80
