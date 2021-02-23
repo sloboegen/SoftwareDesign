@@ -8,13 +8,14 @@ from src.session import Session
 
 class CmdTestCase(unittest.TestCase):
     def _execCommands(self, line: list[str]) -> str:
-        result: StringIO
+        result: StringIO = StringIO()
+
         for cmd in line:
             result = self.session.getCmdResult(cmd)
 
         return result.getvalue().rstrip()
 
-    def assertCmdResult(self, lines: list[str], result: str) -> bool:
+    def assertCmdResult(self, lines: list[str], result: str) -> None:
         self.assertEqual(self._execCommands(lines), result)
 
     def setUp(self) -> None:

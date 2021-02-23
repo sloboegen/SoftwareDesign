@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from .clparser import CmdIR
 import io
 import os
@@ -21,6 +22,7 @@ class CmdExecutor(object):
         self.name = cmd.name
         self.args = cmd.args
 
+    @abstractmethod
     def execute(self, istream: io.StringIO) -> io.StringIO:
         """
         Execute the command

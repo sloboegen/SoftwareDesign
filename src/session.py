@@ -15,6 +15,7 @@ class Session():
     """
 
     def __init__(self) -> None:
+        self.state: dict[str, str]
         self.state = dict()
 
     def getCmdResult(self, line: str) -> StringIO:
