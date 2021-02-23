@@ -14,7 +14,7 @@ class CmdExecutor(object):
         cmd (CmdIR): the command which need to be executed
 
     Attributes:
-        name (str): the command name 
+        name (str): the command name
         args (list): the command args
 
     TODO: rewrite with `return code` and get in-out streams
@@ -41,6 +41,11 @@ class CmdExecutor(object):
 
 
 class EchoExecutor(CmdExecutor):
+    """
+    `echo`: print given arguments
+
+    """
+
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
@@ -51,6 +56,12 @@ class EchoExecutor(CmdExecutor):
 
 
 class PwdExecutor(CmdExecutor):
+    """
+    `pwd`: print current directory
+    args isn't required
+
+    """
+
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
@@ -61,6 +72,12 @@ class PwdExecutor(CmdExecutor):
 
 
 class CatExecutor(CmdExecutor):
+    """
+    `cat FILE`: print the FILE content
+    can be used only with one file
+
+    """
+
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
@@ -75,6 +92,12 @@ class CatExecutor(CmdExecutor):
 
 
 class WcExecutor(CmdExecutor):
+    """
+    `wc FILE`: print a count of line,
+    count of word, count of char in the FILE
+
+    """
+
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
@@ -99,7 +122,7 @@ class WcExecutor(CmdExecutor):
 
 def processCmd(cmd: CmdIR) -> CmdExecutor:
     """
-    Map the command to its executor 
+    Map the command to its executor
 
     Args:
         cmd (CmdIR): the command
@@ -140,7 +163,7 @@ def runCommand(cmds: list[CmdIR]) -> io.StringIO:
         cmds (list[CmdIR]): commands
 
     Returns:
-        io.StringIO: the output stream with the result of the command 
+        io.StringIO: the output stream with the result of the command
 
     """
 
