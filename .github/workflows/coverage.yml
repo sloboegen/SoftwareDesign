@@ -1,4 +1,4 @@
-name: Coverage
+name: Build
 
 on:
   - push
@@ -19,12 +19,26 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: 'generate report'
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: CLI Test
       run: |
         # for testing external process
         sudo apt-get install -y cowsay
+        python -m unittest tests/test_cli.py
+    - name: Parser Test
+      run: |
+        python -m unittest tests/test_parser.py
+    - name: Expanser Test
+      run: |
+        python -m unittest tests/test_expansion.py
+    - name: 'generate report'
+      run: |
         pip install coverage
-        pip install codecov
         python -m coverage run -m unittest
         python -m codecov
     - name: Upload coverage to Codecov
@@ -33,4 +47,3 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         flags: unittests
         fail_ci_if_error: true
-        MINIMUM_COVERAGE: 80
