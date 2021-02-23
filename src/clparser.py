@@ -21,12 +21,17 @@ class CmdIR:
 
         splitted = cmd.split()
 
-        # TODO: check empty
         self.name = splitted[0]
         self.args = ' '.join(splitted[1:])
 
     def __str__(self) -> str:
         return f'{self.name} {self.args}'
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, CmdIR):
+            return False
+
+        return self.name == o.name and self.args == o.args
 
 
 class VarDecl:
@@ -40,7 +45,7 @@ class VarDecl:
 
     Attributes:
         var (str): the variable name
-        value (list[str]): the value of this variable
+        value (str): the value of this variable
 
     """
 
@@ -67,12 +72,9 @@ class VarDecl:
         Returns:
             bool: True if line is variable declaration, False otherwise
 
-        TODO:
-            Fix re-checker. Value in quotes are unmatched now
-
         """
 
-        declRe = re.compile(r'[A-Za-z]\w*=(.+|\'.*\'|\".*\")$')
+        declRe = re.compile(r'[A-Za-z]\w*=([^|<>\'"]*|\'.*\'|\".*\")$')
         return bool(declRe.match(line))
 
     @staticmethod
@@ -83,6 +85,9 @@ class VarDecl:
         return VarDecl(line)
 
     def __parseQuotes(self, value: str) -> str:
+        if not value:
+            return value
+
         if value[0] == '"' and value[-1] == '"':
             return value[1:-1]
 
