@@ -1,16 +1,36 @@
 from io import StringIO
 from .executor import runCommand
 from .expansion import expansion
-from .clparser import parseDecl, parsePipes, checkDecl, VarDecl
+from .clparser import parsePipes, VarDecl
 
 
 class Session():
+    """
+    This class is responsible for current session.
+    It holds an environment (map the variable name to its value)  
+
+    Attributes:
+        state (dict[str, str]): map the variable name to its value
+
+    """
+
     def __init__(self) -> None:
         self.state = dict()
 
     def getCmdResult(self, line: str) -> StringIO:
-        if checkDecl(line):
-            varDecl = parseDecl(line)
+        """
+        Run command and return stream with the result
+
+        Args:
+            line (str): the user entered command
+
+        Returns:
+            StringIO: the stream with the result of cmd execution
+
+        """
+
+        if VarDecl.checkDecl(line):
+            varDecl = VarDecl.parseDecl(line)
             self.__updateState(varDecl)
 
             return StringIO('')
@@ -22,6 +42,18 @@ class Session():
         return ostr
 
     def work(self) -> bool:
+        """
+        Like as eventloop
+
+        Args:
+            No arguments
+
+        Returns:
+            bool: False if it's impossible to continue this session
+                  True otherwise
+
+        """
+
         print('> ', end='')
 
         line: str = input()
@@ -37,8 +69,6 @@ class Session():
         print(ostr.getvalue(), end='')
 
         ostr.close()
-
-        self.endSession()
 
         return True
 

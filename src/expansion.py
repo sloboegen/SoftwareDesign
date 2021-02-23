@@ -1,15 +1,34 @@
 from .clparser import CmdIR
 
-# [(a, 1)] |- $a => 1
-# [(a, 1)] |- "$a" => 1
-# [(a, 1)] |- \"$a\" => "1"
-# [(a, 1)] |- '$a' => $a
-# [(a, 1)] |- "'$a'" => '1'
-# [(a, 1)] |- '"$a"' => "$a"
-# [(a, 1)] |- "'"$a"'"" => '1'
 
+def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
+    """
+    Interpolates each variable by its value from state,
+    except variable in single quotes
 
-def expansion(cmd: CmdIR, state: dict[str, str]) -> str:
+    Args:
+        cmd (CmdIR): a command name and its arguments
+        state (dict[str, str]): variable name -> value
+
+    Returns:
+        command where each variable replaced with its value
+        variables in single quotes are not interpolated
+
+    Examples:
+        >>> expansion(CmdIR('echo $a'), {'a' : 1})
+        1
+        >>> expansion(CmdIR('echo "$a"'), {'a' : 1})
+        1
+        >>> expansion(CmdIR('echo \'$a\'', {'a' : 1}))
+        $a
+        >>> expansion(CmdIR('echo "\'$a\'"'), {'a' : 1})
+        '1'
+        >>> expansion(CmdIR('echo \'"$a"\'), {'a' : 1})
+        "$a"
+        >>> expansion(CmdIR('echo $a'), {})
+        empty-string
+    """
+
     inSingleQuote: bool
     inDoubleQuote: bool
     startVar: bool

@@ -7,6 +7,8 @@ def main():
         while session.work():
             pass
 
+        session.endSession()
+
     except (EOFError, KeyboardInterrupt):
         print('\nBye bye')
 
