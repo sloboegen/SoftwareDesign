@@ -109,6 +109,17 @@ Also you can call an external process from this CLI:
 
 ```
 
+```shell
+> touch file.txt
+> echo 42 43 | tee file.txt
+file.txt
+> cat file.txt
+42 43
+> cat file.txt | grep 42
+42 43
+
+```
+
 ## Architecture overview
 
 CLI has four modules:
