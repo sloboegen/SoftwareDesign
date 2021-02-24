@@ -169,7 +169,8 @@ class ExternalExecutor(CmdExecutor):
 
         externalProcess = subprocess.Popen([self.name, self.args],
                                            stdin=subprocess.PIPE,
-                                           stdout=subprocess.PIPE)
+                                           stdout=subprocess.PIPE,
+                                           stderr=subprocess.PIPE)
 
         encodedInput = bytes(istream.getvalue().encode('utf-8'))
 
