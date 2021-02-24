@@ -1,12 +1,10 @@
 import unittest
 from src.expansion import expansion
-from src.clparser import CmdIR
 
 
 class ExpansionTestCase(unittest.TestCase):
     def assertExpansion(self, line: str, state: dict[str, str], result: str):
-        expansed: str = str(expansion(CmdIR(line), state))
-        self.assertEqual(expansed, result)
+        self.assertEqual(expansion(line, state), result)
 
     def test_simple(self):
         line = 'echo $a'

@@ -1,31 +1,28 @@
-from .clparser import CmdIR
-
-
-def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
+def expansion(cmdline: str, state: dict[str, str]) -> str:
     """
     Interpolates each variable by its value from state,
     except variable in single quotes
 
     Args:
-        cmd (CmdIR): a command name and its arguments
+        cmd (str): a command name and its arguments
         state (dict[str, str]): variable name -> value
 
     Returns:
-        command where each variable replaced with its value
+        str: command where each variable replaced with its value
         variables in single quotes are not interpolated
 
     Examples:
-        >>> expansion(CmdIR('echo $a'), {'a' : 1})
+        >>> expansion('$a', {'a' : 1})
         1
-        >>> expansion(CmdIR('echo "$a"'), {'a' : 1})
-        1
-        >>> expansion(CmdIR('echo \'$a\'', {'a' : 1}))
+        >>> expansion('"$a"', {'a' : 1})
+        echo 1
+        >>> expansion('\'$a\'', {'a' : 1}))
         $a
-        >>> expansion(CmdIR('echo "\'$a\'"'), {'a' : 1})
+        >>> expansion('"\'$a\'"', {'a' : 1})
         '1'
-        >>> expansion(CmdIR('echo \'"$a"\'), {'a' : 1})
+        >>> expansion('\'"$a"\', {'a' : 1})
         "$a"
-        >>> expansion(CmdIR('echo $a'), {})
+        >>> expansion('$a', {})
         empty-string
 
     """
@@ -37,8 +34,6 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
 
     expansed: str = ''
     curVar: str = ''
-
-    cmdline = cmd.name + ' ' + cmd.args
 
     for sym in cmdline:
         if sym == "'" and not inDoubleQuote:
@@ -80,4 +75,4 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
         curVar = ''
         startVar = False
 
-    return CmdIR(expansed)
+    return expansed

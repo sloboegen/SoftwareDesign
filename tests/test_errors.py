@@ -53,6 +53,22 @@ class ErrorTestCase(CmdTestCase):
         p = ['wc unknownName']
         self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
+    def test_grep_a_null(self):
+        p = ['grep -A']
+        self.assertErrorMsgEquals(
+            p, 'grep: after "-A" key a number must be, but found nothing')
+
+    def test_grep_a_str(self):
+        p = ['grep -A str']
+        self.assertErrorMsgEquals(
+            p, 'grep: after "-A" key a number must be, but found str')
+
+    def test_grep_file(self):
+        p = ['grep -i pattern UnknownFile']
+        self.assertErrorMsgEquals(
+            p, 'grep: UnknownFile: no such file'
+        )
+
     def test_external1(self):
         p = ['ping foo']
         self.assertErrorMsgEquals(

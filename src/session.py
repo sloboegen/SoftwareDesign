@@ -1,7 +1,7 @@
 from io import StringIO
 from .executor import runCommand
 from .expansion import expansion
-from .clparser import parsePipes, VarDecl
+from .clparser import createCmdIR, parsePipes, VarDecl
 
 
 class Session():
@@ -36,11 +36,13 @@ class Session():
 
             return StringIO('')
 
+        cmds: list[str]
         cmds = parsePipes(line)
-        cmds = list(map(lambda c: expansion(c, self.state), cmds))
+        cmds = [expansion(c, self.state) for c in cmds]
+        cmdsIR = createCmdIR(cmds)
 
         try:
-            ostr = runCommand(cmds)
+            ostr = runCommand(cmdsIR)
         except Exception as e:
             raise e
 
