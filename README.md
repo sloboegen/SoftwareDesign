@@ -122,7 +122,4 @@ CLI has four modules:
  * Executor: run the given command
 
 
- This architecture can be presented by following picture:
-
-    
-
+More detailed description of architecture see in [description.md](./architecture/description.md)
