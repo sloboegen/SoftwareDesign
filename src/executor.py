@@ -16,6 +16,12 @@ class CmdExecutor(object):
         name (str): the command name
         args (list): the command args
 
+    Raises:
+        RuntimeError: if there is some error
+
+        FileNotFoundError: for `cat` and `wc` command only,
+            if no such file in directory
+
     """
 
     def __init__(self, cmd: CmdIR) -> None:
@@ -49,7 +55,12 @@ class EchoExecutor(CmdExecutor):
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-        ostream.write(self.args)
+
+        try:
+            ostream.write(self.args)
+        except Exception:
+            raise RuntimeError('echo: check your arguments')
+
         return ostream
 
 
@@ -65,7 +76,12 @@ class PwdExecutor(CmdExecutor):
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-        ostream.write(os.getcwd())
+
+        try:
+            ostream.write(os.getcwd())
+        except Exception:
+            raise RuntimeError('pwd: some bads with pwd')
+
         return ostream
 
 
@@ -81,10 +97,22 @@ class CatExecutor(CmdExecutor):
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-        assert len(self.args.split()) == 1, "Only one file"
+
+        cntArgs: int = len(self.args.split())
+
+        if cntArgs != 1:
+            raise RuntimeError(
+                f'cat: cat supports only one file, but given {cntArgs}')
+
         filename: str = self.args
-        with open(filename) as f:
-            ostream.write(f.read())
+
+        try:
+            with open(filename) as f:
+                ostream.write(f.read())
+        except FileNotFoundError:
+            raise FileNotFoundError(f'cat: {filename}: no such file')
+        except Exception:
+            raise RuntimeError('cat: unknown error with cat')
 
         return ostream
 
@@ -102,17 +130,26 @@ class WcExecutor(CmdExecutor):
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
 
-        assert len(self.args.split()) == 1, "Only one file"
+        cntArgs: int = len(self.args.split())
+
+        if cntArgs != 1:
+            raise RuntimeError(
+                f'wc: wc supports only one file, but given {cntArgs}')
 
         filename: str = self.args
 
         lineCnt, wordCnt, charCnt = 0, 0, 0
 
-        with open(filename) as f:
-            for line in f:
-                lineCnt += 1
-                wordCnt += len(line.split())
-                charCnt += len(line)
+        try:
+            with open(filename) as f:
+                for line in f:
+                    lineCnt += 1
+                    wordCnt += len(line.split())
+                    charCnt += len(line)
+        except FileNotFoundError:
+            raise FileNotFoundError(f'wc: {filename}: no such file')
+        except Exception:
+            raise RuntimeError('wc: unknown error with wc')
 
         ostream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
         return ostream
@@ -155,10 +192,6 @@ def processCmd(cmd: CmdIR) -> CmdExecutor:
     Returns:
         CmdExecutor: the executor for the command
 
-    Raises:
-        TODO: add more exceptions
-        NotImplemetedError
-
     """
 
     name: str = cmd.name
@@ -194,7 +227,10 @@ def runCommand(cmds: list[CmdIR]) -> io.StringIO:
     cmdsExec: list[CmdExecutor] = list(map(processCmd, cmds))
 
     for cmd in cmdsExec:
-        result = cmd.execute(result)
+        try:
+            result = cmd.execute(result)
+        except Exception as e:
+            raise e
 
     result.write('\n')
 

@@ -2,15 +2,22 @@ from .session import Session
 
 
 def main():
-    try:
-        session = Session()
-        while session.work():
-            pass
+    session = Session()
 
-        session.endSession()
+    isActive: bool = True
 
-    except (EOFError, KeyboardInterrupt):
-        print('\nBye bye')
+    while isActive:
+        try:
+            isActive = session.work()
+
+        except (EOFError, KeyboardInterrupt):
+            session.endSession()
+            print('\nBye bye')
+            break
+
+        except Exception as e:
+            print(str(e))
+            continue
 
 
 if __name__ == '__main__':

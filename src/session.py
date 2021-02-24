@@ -38,7 +38,11 @@ class Session():
 
         cmds = parsePipes(line)
         cmds = list(map(lambda c: expansion(c, self.state), cmds))
-        ostr = runCommand(cmds)
+
+        try:
+            ostr = runCommand(cmds)
+        except Exception as e:
+            raise e
 
         return ostr
 
@@ -63,7 +67,7 @@ class Session():
             return True
 
         if line == 'exit':
-            return False
+            raise EOFError
 
         ostr = self.getCmdResult(line)
 
