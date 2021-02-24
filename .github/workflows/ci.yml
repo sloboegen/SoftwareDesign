@@ -36,6 +36,9 @@ jobs:
     - name: Expanser Test
       run: |
         python -m unittest tests/test_expansion.py
+    - name: Errors Test
+      run: |
+        python -m unittest tests/test_errors.py
     - name: 'generate report'
       run: |
         pip install coverage
