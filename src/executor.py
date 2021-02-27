@@ -88,7 +88,10 @@ class PwdExecutor(CmdExecutor):
 
 class CatExecutor(CmdExecutor):
     """
-    `cat FILE`: print the FILE content
+    `cat [FILE]`: print the FILE content
+        if there is no FILE, cat prints
+        the content of the input stream
+
     can be used only with one file
 
     """
@@ -142,6 +145,7 @@ class WcExecutor(CmdExecutor):
     """
     `wc FILE`: print a count of line,
     count of word, count of char in the FILE
+    or the input stream, if there is no FILE
 
     """
 

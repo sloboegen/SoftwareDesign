@@ -65,11 +65,11 @@ Prints the current folder.
 
 #### cat
 
-Can be used only with one file. Prints the content of the file.
+Prints the content of the file or of the input stream if there is no input file. Stand-alone `cat` command prints the content of the user input.
 
 #### wc
 
-Can be used only with one file. Prints a count of lines, a count of words, a count of chars in the file.
+Prints a count of lines, a count of words, a count of chars in the file or of the input stream if there is no input file. Stand-alone `wc` command prints same characteristics of the user input.
 
 #### exit
 

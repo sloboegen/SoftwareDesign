@@ -157,7 +157,7 @@ class WcTestCase(CmdTestCase):
         p = self._getCorrectPath('/files/random')
         cmd = [f'cat {p} | wc']
 
-        self.assertCmdResult(cmd, f'5 40 253') 
+        self.assertCmdResult(cmd, '5 40 253')
 
 
 class ExternalTestCase(CmdTestCase):
