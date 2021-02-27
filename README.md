@@ -71,6 +71,21 @@ Prints the content of the file or of the input stream if there is no input file.
 
 Prints a count of lines, a count of words, a count of chars in the file or of the input stream if there is no input file. Stand-alone `wc` command prints same characteristics of the user input.
 
+#### grep
+
+Usage:
+```shell
+> grep [KEYS] PATTERNS [FILE]
+```
+
+`grep` searches for PATTERNS in FILE or in the input stream if there is no file.
+
+`grep` supports following keys:
+
+ * -i: is it need to match with case insensitive
+ * -w: is it need to match a whole word
+ * -A COUNT: the count of strings need to print after match
+
 #### exit
 
 Ends the current session
