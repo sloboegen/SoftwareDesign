@@ -2,6 +2,7 @@ from abc import abstractmethod
 from .clparser import CmdIR
 import io
 import os
+import sys
 import subprocess
 
 
@@ -95,24 +96,44 @@ class CatExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
+    @staticmethod
+    def _catFromFile(filename: str) -> str:
+        contet: str = ''
+
+        try:
+            with open(filename, 'r') as f:
+                contet = f.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(f'cat: {filename}: no such file')
+
+        return contet
+
+    @staticmethod
+    def _catFromConsole() -> str:
+        result: str = ''
+        for line in sys.stdin:
+            result += line
+        return result
+
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-
         cntArgs: int = len(self.args.split())
+        realInput: str = ''
 
-        if cntArgs != 1:
+        if cntArgs == 1:
+            filename: str = self.args
+            realInput = self._catFromFile(filename)
+        elif cntArgs == 0:
+            istreamText: str = istream.getvalue()
+            if not istreamText:
+                realInput = self._catFromConsole().rstrip()
+            else:
+                realInput = istreamText
+        else:
             raise RuntimeError(
                 f'cat: cat supports only one file, but given {cntArgs}')
 
-        filename: str = self.args
-
-        try:
-            with open(filename) as f:
-                ostream.write(f.read())
-        except FileNotFoundError:
-            raise FileNotFoundError(f'cat: {filename}: no such file')
-        except Exception:
-            raise RuntimeError('cat: unknown error with cat')
+        ostream.write(realInput)
 
         return ostream
 
@@ -127,29 +148,54 @@ class WcExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
+    @staticmethod
+    def _wcFromFile(filename: str) -> list[str]:
+        content: list[str]
+
+        try:
+            with open(filename, 'r') as f:
+                content = f.readlines()
+        except FileNotFoundError:
+            raise FileNotFoundError(f'wc: {filename}: no such file')
+
+        return content
+
+    @staticmethod
+    def _wcFromConsole() -> list[str]:
+        result: list[str] = []
+        for line in sys.stdin:
+            result.append(line)
+        return result
+
+    @staticmethod
+    def _wcFromIStream(istream: io.StringIO) -> list[str]:
+        splited = istream.getvalue().split('\n')
+        return [s + '\n' for s in splited][:-1]
+
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-
         cntArgs: int = len(self.args.split())
+        realInput: list[str] = []
+        filename: str = self.args
 
-        if cntArgs != 1:
+        if cntArgs == 1:
+            realInput = self._wcFromFile(filename)
+        elif cntArgs == 0:
+            inputText: str = istream.getvalue()
+            if inputText:
+                realInput = self._wcFromIStream(istream)
+            else:
+                realInput = self._wcFromConsole()
+        else:
             raise RuntimeError(
                 f'wc: wc supports only one file, but given {cntArgs}')
 
-        filename: str = self.args
-
         lineCnt, wordCnt, charCnt = 0, 0, 0
 
-        try:
-            with open(filename) as f:
-                for line in f:
-                    lineCnt += 1
-                    wordCnt += len(line.split())
-                    charCnt += len(line)
-        except FileNotFoundError:
-            raise FileNotFoundError(f'wc: {filename}: no such file')
-        except Exception:
-            raise RuntimeError('wc: unknown error with wc')
+        for line in realInput:
+            lineCnt += 1
+            wordCnt += len(line.split())
+            charCnt += len(line)
 
         ostream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
         return ostream

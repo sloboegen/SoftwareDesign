@@ -124,6 +124,11 @@ class CatTestCase(CmdTestCase):
 
         self.assertCmdResult(cmd, gold)
 
+    def test_pipes(self):
+        cmd = ['echo 42 | cat']
+
+        self.assertCmdResult(cmd, '42')
+
 
 class WcTestCase(CmdTestCase):
     def _getCorrectPath(self, relPath: str) -> str:
@@ -147,6 +152,12 @@ class WcTestCase(CmdTestCase):
         cmd = [f'wc {p}']
 
         self.assertCmdResult(cmd, f'6 0 6 {p}')
+
+    def test_pipes(self):
+        p = self._getCorrectPath('/files/random')
+        cmd = [f'cat {p} | wc']
+
+        self.assertCmdResult(cmd, f'5 40 253') 
 
 
 class ExternalTestCase(CmdTestCase):
