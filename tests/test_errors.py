@@ -26,30 +26,20 @@ class ErrorTestCase(CmdTestCase):
         self.session.endSession()
 
     def test_cat1(self):
-        p = ['cat']
-        self.assertErrorMsgEquals(
-            p, 'cat: cat supports only one file, but given 0')
-
-    def test_cat2(self):
         p = ['cat foo goo']
         self.assertErrorMsgEquals(
             p, 'cat: cat supports only one file, but given 2')
 
-    def test_cat3(self):
+    def test_cat2(self):
         p = ['wc unknownName']
         self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
     def test_wc1(self):
-        p = ['wc']
-        self.assertErrorMsgEquals(
-            p, 'wc: wc supports only one file, but given 0')
-
-    def test_wc2(self):
         p = ['wc foo goo']
         self.assertErrorMsgEquals(
             p, 'wc: wc supports only one file, but given 2')
 
-    def test_wc3(self):
+    def test_wc2(self):
         p = ['wc unknownName']
         self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
