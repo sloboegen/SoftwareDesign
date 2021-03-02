@@ -159,6 +159,10 @@ class WcTestCase(CmdTestCase):
 
         self.assertCmdResult(cmd, '5 40 253')
 
+    def test_pipes_echo(self):
+        cmd = ['echo 123 | wc']
+        self.assertCmdResult(cmd, '1 1 4')
+
 
 class ExternalTestCase(CmdTestCase):
     def getExternalResult(self, name: str, args: str):

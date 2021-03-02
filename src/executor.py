@@ -173,8 +173,16 @@ class WcExecutor(CmdExecutor):
 
     @staticmethod
     def _wcFromIStream(istream: io.StringIO) -> list[str]:
-        splited = istream.getvalue().split('\n')
-        return [s + '\n' for s in splited][:-1]
+        text = istream.getvalue()
+        hasEndlInEnd: bool = (text[-1] == '\n')
+
+        splited = text.split('\n')
+        splited = [s + '\n' for s in splited]
+
+        if hasEndlInEnd:
+            splited = splited[:-1]
+
+        return splited
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
