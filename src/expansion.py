@@ -38,7 +38,7 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
     expansed: str = ''
     curVar: str = ''
 
-    cmdline = cmd.name + ' ' + cmd.args
+    cmdline = cmd.name + ' ' + ' '.join(cmd.args)
 
     for sym in cmdline:
         if sym == "'" and not inDoubleQuote:

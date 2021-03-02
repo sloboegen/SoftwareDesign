@@ -17,15 +17,12 @@ class CmdIR:
 
     def __init__(self, cmd: str) -> None:
         self.name: str
-        self.args: str
+        self.args: list[str]
 
-        splitted = cmd.split()
-
-        self.name = splitted[0]
-        self.args = ' '.join(splitted[1:])
+        self.name, *self.args = cmd.split()
 
     def __str__(self) -> str:
-        return f'{self.name} {self.args}'
+        return f'{self.name} {" ".join(self.args)}'
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, CmdIR):

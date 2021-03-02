@@ -58,7 +58,7 @@ class EchoExecutor(CmdExecutor):
         ostream = io.StringIO()
 
         try:
-            ostream.write(self.args)
+            ostream.write(' '.join(self.args))
         except Exception:
             raise RuntimeError('echo: check your arguments')
 
@@ -120,11 +120,11 @@ class CatExecutor(CmdExecutor):
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-        cntArgs: int = len(self.args.split())
+        cntArgs: int = len(self.args)
         realInput: str = ''
 
         if cntArgs == 1:
-            filename: str = self.args
+            filename: str = self.args[0]
             realInput = self._catFromFile(filename)
         elif cntArgs == 0:
             istreamText: str = istream.getvalue()
@@ -178,11 +178,12 @@ class WcExecutor(CmdExecutor):
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
-        cntArgs: int = len(self.args.split())
+        cntArgs: int = len(self.args)
         realInput: list[str] = []
-        filename: str = self.args
+        filename: str = ''
 
         if cntArgs == 1:
+            filename = self.args[0]
             realInput = self._wcFromFile(filename)
         elif cntArgs == 0:
             inputText: str = istream.getvalue()
@@ -227,7 +228,7 @@ class ExternalExecutor(CmdExecutor):
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
 
-        externalProcess = subprocess.Popen([self.name, self.args],
+        externalProcess = subprocess.Popen([self.name, *self.args],
                                            stdin=subprocess.PIPE,
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE)
