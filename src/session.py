@@ -68,8 +68,8 @@ class Session():
         if line == '':
             return True
 
-        if line == 'exit':
-            raise EOFError
+        # if line == 'exit':
+        #     raise EOFError
 
         ostr = self.getCmdResult(line)
 

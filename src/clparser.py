@@ -180,6 +180,8 @@ class VarDecl:
 
     """
 
+    declRe = re.compile(r'[A-Za-z]\w*=([^|<>\'"]*|\'.*\'|\".*\")$')
+
     def __init__(self, decl: str) -> None:
         self.var: str
         self.value: str
@@ -205,8 +207,7 @@ class VarDecl:
 
         """
 
-        declRe = re.compile(r'[A-Za-z]\w*=([^|<>\'"]*|\'.*\'|\".*\")$')
-        return bool(declRe.match(line))
+        return bool(VarDecl.declRe.match(line))
 
     @staticmethod
     def parseDecl(line: str) -> VarDecl:
