@@ -63,7 +63,7 @@ class Session():
 
         line: str = input()
 
-        if line == '':
+        if line == '' or line.isspace():
             return True
 
         ostr = self.getCmdResult(line)
