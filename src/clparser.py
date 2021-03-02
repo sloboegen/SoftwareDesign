@@ -11,7 +11,7 @@ class CmdIR:
 
     Attributes:
         name (str): the command name
-        args (str): the command args splited by whitespace
+        args (list[str]): the command args splited by whitespace
 
     """
 
