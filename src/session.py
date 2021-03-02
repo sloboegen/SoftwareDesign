@@ -30,14 +30,16 @@ class Session():
 
         """
 
-        if VarDecl.checkDecl(line):
-            varDecl = VarDecl.parseDecl(line)
+        expansed: str = expansion(line, self.state)
+
+        if VarDecl.checkDecl(expansed):
+            varDecl = VarDecl.parseDecl(expansed)
             self.__updateState(varDecl)
 
             return StringIO('')
 
-        cmds = parsePipes(line)
-        cmds = list(map(lambda c: expansion(c, self.state), cmds))
+        cmds = parsePipes(expansed)
+        # cmds = list(map(lambda c: expansion(c, self.state), cmds))
 
         try:
             ostr = runCommand(cmds)

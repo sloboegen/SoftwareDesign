@@ -1,13 +1,10 @@
-from .clparser import CmdIR
-
-
-def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
+def expansion(cmd: str, state: dict[str, str]) -> str:
     """
     Interpolates each variable by its value from state,
     except variable in single quotes
 
     Args:
-        cmd (CmdIR): a command name and its arguments
+        cmd (str): user input
         state (dict[str, str]): variable name -> value
 
     Returns:
@@ -15,17 +12,17 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
         variables in single quotes are not interpolated
 
     Examples:
-        >>> expansion(CmdIR('echo $a'), {'a' : 1})
+        >>> expansion('echo $a', {'a' : 1})
         1
-        >>> expansion(CmdIR('echo "$a"'), {'a' : 1})
+        >>> expansion('echo "$a"', {'a' : 1})
         1
-        >>> expansion(CmdIR('echo \'$a\'', {'a' : 1}))
+        >>> expansion('echo \'$a\'', {'a' : 1}))
         $a
-        >>> expansion(CmdIR('echo "\'$a\'"'), {'a' : 1})
+        >>> expansion('echo "\'$a\'"', {'a' : 1})
         '1'
-        >>> expansion(CmdIR('echo \'"$a"\'), {'a' : 1})
+        >>> expansion('echo \'"$a"\', {'a' : 1})
         "$a"
-        >>> expansion(CmdIR('echo $a'), {})
+        >>> expansion('echo $a', {})
         empty-string
 
     """
@@ -38,9 +35,7 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
     expansed: str = ''
     curVar: str = ''
 
-    cmdline = cmd.name + ' ' + ' '.join(cmd.args)
-
-    for sym in cmdline:
+    for sym in cmd:
         if sym == "'" and not inDoubleQuote:
             inSingleQuote ^= True
             continue
@@ -50,6 +45,11 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
             continue
 
         if sym == '$' and not inSingleQuote:
+            # for example, `$x$y`
+            if startVar:
+                expansed += state.setdefault(curVar, '')
+                curVar = ''
+
             startVar = True
             continue
 
@@ -80,4 +80,4 @@ def expansion(cmd: CmdIR, state: dict[str, str]) -> CmdIR:
         curVar = ''
         startVar = False
 
-    return CmdIR(expansed)
+    return expansed
