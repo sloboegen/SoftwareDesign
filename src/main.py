@@ -4,11 +4,9 @@ from .session import Session
 def main():
     session = Session()
 
-    isActive: bool = True
-
-    while isActive:
+    while True:
         try:
-            isActive = session.work()
+            _ = session.work()
 
         except (EOFError, KeyboardInterrupt):
             session.endSession()

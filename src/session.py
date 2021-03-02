@@ -66,9 +66,6 @@ class Session():
         if line == '':
             return True
 
-        if line == 'exit':
-            raise EOFError
-
         ostr = self.getCmdResult(line)
 
         print(ostr.getvalue(), end='')

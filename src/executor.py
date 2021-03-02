@@ -205,6 +205,16 @@ class WcExecutor(CmdExecutor):
         return ostream
 
 
+class ExitExecutor(CmdExecutor):
+    """
+    Stops the session
+
+    """
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        raise EOFError
+
+
 class ExternalExecutor(CmdExecutor):
     """
     Run some external process
@@ -258,6 +268,9 @@ def processCmd(cmd: CmdIR) -> CmdExecutor:
 
     if name == 'wc':
         return WcExecutor(cmd)
+
+    if name == 'exit':
+        return ExitExecutor(cmd)
 
     return ExternalExecutor(cmd)
 
