@@ -95,7 +95,7 @@ class VarDecl:
         return value
 
 
-def parsePipes(line: str) -> list[CmdIR]:
+def parsePipes(line: str) -> list[str]:
     """
     Split the command with a pipe
 
@@ -103,11 +103,49 @@ def parsePipes(line: str) -> list[CmdIR]:
         line (str): the user entered line
 
     Returns:
-        list[CmdIR]: the list of all commands between pipes
+        list[str]: the list of all commands between pipes
 
     """
 
-    cmds: list[str] = line.split('|')
-    cmdsIR: list[CmdIR] = [CmdIR(cmd) for cmd in cmds]
+    # cmds: list[str] = line.split('|')
+    # cmdsIR: list[CmdIR] = [CmdIR(cmd) for cmd in cmds]
+    # return cmdsIR
 
-    return cmdsIR
+    splited: list[str] = []
+    curCmd: str = ''
+    inSingleQuote: bool = False
+    inDoubleQuote: bool = False
+
+    # print(line)
+
+    for sym in line:
+        if sym == '"':
+            inDoubleQuote ^= True
+            curCmd += sym
+            continue
+
+        if sym == "'":
+            inSingleQuote ^= True
+            curCmd += sym
+            continue
+
+        if sym != '|':
+            curCmd += sym
+            continue
+
+        if (sym == '|') and (inSingleQuote or inDoubleQuote):
+            curCmd += sym
+            continue
+
+        splited.append(curCmd.strip())
+        curCmd = ''
+
+    if curCmd != '':
+        splited.append(curCmd.strip())
+        curCmd = ''
+
+    return splited
+
+    # print(splited)
+
+    # return [CmdIR(c) for c in splited]

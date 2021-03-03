@@ -98,6 +98,10 @@ class EchoTestCase(CmdTestCase):
         cmd = ['echo 42 | echo 43 44']
         self.assertCmdResult(cmd, '43 44')
 
+    def test_not_pipe(self):
+        cmd = ['echo "asd|asd"']
+        self.assertCmdResult(cmd, 'asd|asd')
+
 
 class PwdTestCase(CmdTestCase):
     def test_pwd(self):

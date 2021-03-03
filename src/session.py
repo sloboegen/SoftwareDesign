@@ -1,7 +1,7 @@
 from io import StringIO
 from .executor import runCommand
 from .expansion import expansion
-from .clparser import parsePipes, VarDecl
+from .clparser import CmdIR, parsePipes, VarDecl
 
 
 class Session():
@@ -30,16 +30,19 @@ class Session():
 
         """
 
-        expansed: str = expansion(line, self.state)
+        splitByPipes: list[str] = parsePipes(line)
 
-        if VarDecl.checkDecl(expansed):
-            varDecl = VarDecl.parseDecl(expansed)
+        expansed: list[str] = [expansion(c, self.state) for c in splitByPipes]
+
+        isDecl: bool = (len(expansed) == 1 and VarDecl.checkDecl(expansed[0]))
+
+        if isDecl:
+            varDecl = VarDecl.parseDecl(expansed[0])
             self.__updateState(varDecl)
 
             return StringIO('')
 
-        cmds = parsePipes(expansed)
-        # cmds = list(map(lambda c: expansion(c, self.state), cmds))
+        cmds = [CmdIR(c) for c in expansed]
 
         try:
             ostr = runCommand(cmds)

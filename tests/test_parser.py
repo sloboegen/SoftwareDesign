@@ -56,6 +56,9 @@ class VarDeclTestCase(unittest.TestCase):
     def test_checkDeclFalse4(self):
         self.assertDeclFalse('a=1 | echo 42')
 
+    def test_pipe(self):
+        self.assertDeclTrue('a="echo 42 | cat"')
+
     def test_checkDeclFalseChars(self):
         self.assertDeclFalse('a=|')
         self.assertDeclFalse('a=<')
@@ -82,11 +85,10 @@ class CmdTestCase(unittest.TestCase):
 
 class PipesTestCase(unittest.TestCase):
     def assertPipeEqual(self, line: str, cmds: list[str]):
-        cmdsIR = [CmdIR(c) for c in cmds]
         result = parsePipes(line)
 
-        for testing, gold in zip(result, cmdsIR):
-            self.assertTrue(testing == gold)
+        for testing, gold in zip(result, cmds):
+            self.assertEqual(testing, gold)
 
     def test_simple(self):
         line = 'cat file.txt | cat file2.txt'
