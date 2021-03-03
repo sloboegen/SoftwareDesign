@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import IO
 from .clparser import CmdIR
 import io
 import os
@@ -43,6 +44,30 @@ class CmdExecutor(object):
         """
 
         pass
+
+    @classmethod
+    @abstractmethod
+    def _cmdImpl(cls, istream: IO) -> io.StringIO:
+        """
+        The implementation of the concrete command
+
+        """
+
+        pass
+
+    @classmethod
+    def _readFromStream(cls, istream: io.StringIO) -> io.StringIO:
+        newStream = io.StringIO(istream.getvalue())
+        return cls._cmdImpl(newStream)
+
+    @classmethod
+    def _readFromConsole(cls) -> io.StringIO:
+        return cls._cmdImpl(sys.stdin)
+
+    @classmethod
+    def _readFromFile(cls, filename: str) -> io.StringIO:
+        with open(filename, 'r') as f:
+            return cls._cmdImpl(f)
 
 
 class EchoExecutor(CmdExecutor):
@@ -99,44 +124,30 @@ class CatExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    @staticmethod
-    def _catFromFile(filename: str) -> str:
-        contet: str = ''
+    @classmethod
+    def _cmdImpl(cls, istream: IO) -> io.StringIO:
+        ostream: io.StringIO = io.StringIO()
 
-        try:
-            with open(filename, 'r') as f:
-                contet = f.read()
-        except FileNotFoundError:
-            raise FileNotFoundError(f'cat: {filename}: no such file')
+        for line in istream:
+            ostream.write(line)
 
-        return contet
-
-    @staticmethod
-    def _catFromConsole() -> str:
-        result: str = ''
-        for line in sys.stdin:
-            result += line
-        return result
+        return ostream
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
         cntArgs: int = len(self.args)
-        realInput: str = ''
 
         if cntArgs == 1:
             filename: str = self.args[0]
-            realInput = self._catFromFile(filename)
+            ostream = self._readFromFile(filename)
         elif cntArgs == 0:
-            istreamText: str = istream.getvalue()
-            if not istreamText:
-                realInput = self._catFromConsole().rstrip()
+            if istream.getvalue():
+                ostream = self._readFromStream(istream)
             else:
-                realInput = istreamText
+                ostream = self._readFromConsole()
         else:
             raise ValueError(
                 f'cat: cat supports only one file, but given {cntArgs}')
-
-        ostream.write(realInput)
 
         return ostream
 
@@ -152,65 +163,55 @@ class WcExecutor(CmdExecutor):
     def __init__(self, cmd: CmdIR) -> None:
         super().__init__(cmd)
 
-    @staticmethod
-    def _wcFromFile(filename: str) -> list[str]:
-        content: list[str]
-
-        try:
-            with open(filename, 'r') as f:
-                content = f.readlines()
-        except FileNotFoundError:
-            raise FileNotFoundError(f'wc: {filename}: no such file')
-
-        return content
-
-    @staticmethod
-    def _wcFromConsole() -> list[str]:
-        result: list[str] = []
-        for line in sys.stdin:
-            result.append(line)
-        return result
-
-    @staticmethod
-    def _wcFromIStream(istream: io.StringIO) -> list[str]:
-        text = istream.getvalue()
-        hasEndlInEnd: bool = (text[-1] == '\n')
-
-        splited = text.split('\n')
-        splited = [s + '\n' for s in splited]
-
-        if hasEndlInEnd:
-            splited = splited[:-1]
-
-        return splited
-
-    def execute(self, istream: io.StringIO) -> io.StringIO:
-        ostream = io.StringIO()
-        cntArgs: int = len(self.args)
-        realInput: list[str] = []
-        filename: str = ''
-
-        if cntArgs == 1:
-            filename = self.args[0]
-            realInput = self._wcFromFile(filename)
-        elif cntArgs == 0:
-            inputText: str = istream.getvalue()
-            if inputText:
-                realInput = self._wcFromIStream(istream)
-            else:
-                realInput = self._wcFromConsole()
-        else:
-            raise ValueError(
-                f'wc: wc supports only one file, but given {cntArgs}')
+    @classmethod
+    def _cmdImpl(cls, istream: IO) -> io.StringIO:
+        ostream: io.StringIO = io.StringIO()
 
         lineCnt, wordCnt, charCnt = 0, 0, 0
 
-        for line in realInput:
+        for line in istream:
             lineCnt += 1
             wordCnt += len(line.split())
             charCnt += len(line)
 
-        ostream.write(f'{lineCnt} {wordCnt} {charCnt} {filename}')
+        ostream.write(f'{lineCnt} {wordCnt} {charCnt}')
+
+        return ostream
+
+    @classmethod
+    def _readFromFile(cls, filename: str) -> io.StringIO:
+        ostream = super()._readFromFile(filename)
+        ostream.write(f' {filename}')
+        return ostream
+
+    @classmethod
+    def _readFromStream(cls, istream: io.StringIO) -> io.StringIO:
+        text = istream.getvalue()
+        hasEndlInEnd: bool = (text[-1] == '\n')
+
+        if not hasEndlInEnd:
+            text = text + '\n'
+
+        newStream = io.StringIO(text)
+        return WcExecutor._cmdImpl(newStream)
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+        cntArgs: int = len(self.args)
+        filename: str = ''
+
+        if cntArgs == 1:
+            filename = self.args[0]
+            ostream = WcExecutor._readFromFile(filename)
+        elif cntArgs == 0:
+            if istream.getvalue():
+                ostream = WcExecutor._readFromStream(istream)
+            else:
+                ostream = WcExecutor._readFromConsole()
+        else:
+            raise ValueError(
+                f'wc: wc supports only one file, but given {cntArgs}')
+
         return ostream
 
 
