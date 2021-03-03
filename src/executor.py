@@ -133,7 +133,7 @@ class CatExecutor(CmdExecutor):
             else:
                 realInput = istreamText
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f'cat: cat supports only one file, but given {cntArgs}')
 
         ostream.write(realInput)
@@ -200,7 +200,7 @@ class WcExecutor(CmdExecutor):
             else:
                 realInput = self._wcFromConsole()
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f'wc: wc supports only one file, but given {cntArgs}')
 
         lineCnt, wordCnt, charCnt = 0, 0, 0
