@@ -30,18 +30,10 @@ class ErrorTestCase(CmdTestCase):
         self.assertErrorMsgEquals(
             p, 'cat: cat supports only one file, but given 2')
 
-    # def test_cat3(self):
-    #     p = ['wc unknownName']
-    #     self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
-
     def test_wc2(self):
         p = ['wc foo goo']
         self.assertErrorMsgEquals(
             p, 'wc: wc supports only one file, but given 2')
-
-    # def test_wc3(self):
-    #     p = ['wc unknownName']
-    #     self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
     def test_external1(self):
         p = ['ping foo']

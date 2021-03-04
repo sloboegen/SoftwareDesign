@@ -107,16 +107,10 @@ def parsePipes(line: str) -> list[str]:
 
     """
 
-    # cmds: list[str] = line.split('|')
-    # cmdsIR: list[CmdIR] = [CmdIR(cmd) for cmd in cmds]
-    # return cmdsIR
-
     splited: list[str] = []
     curCmd: str = ''
     inSingleQuote: bool = False
     inDoubleQuote: bool = False
-
-    # print(line)
 
     for sym in line:
         if sym == '"':
@@ -145,7 +139,3 @@ def parsePipes(line: str) -> list[str]:
         curCmd = ''
 
     return splited
-
-    # print(splited)
-
-    # return [CmdIR(c) for c in splited]
