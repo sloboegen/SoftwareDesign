@@ -1,7 +1,7 @@
 from io import StringIO
 from .executor import runCommand
 from .expansion import expansion
-from .clparser import createCmdIR, parsePipes, VarDecl
+from .clparser import VarDecl, parsePipes, getCmdParser
 
 
 class Session():
@@ -30,19 +30,22 @@ class Session():
 
         """
 
-        if VarDecl.checkDecl(line):
-            varDecl = VarDecl.parseDecl(line)
+        splitByPipes: list[str] = parsePipes(line)
+
+        expansed: list[str] = [expansion(c, self.state) for c in splitByPipes]
+
+        isDecl: bool = (len(expansed) == 1 and VarDecl.checkDecl(expansed[0]))
+
+        if isDecl:
+            varDecl = VarDecl.parseDecl(expansed[0])
             self.__updateState(varDecl)
 
             return StringIO('')
 
-        cmds: list[str]
-        cmds = parsePipes(line)
-        cmds = [expansion(c, self.state) for c in cmds]
-        cmdsIR = createCmdIR(cmds)
+        cmds = [getCmdParser(c) for c in expansed]
 
         try:
-            ostr = runCommand(cmdsIR)
+            ostr = runCommand(cmds)
         except Exception as e:
             raise e
 
@@ -65,11 +68,8 @@ class Session():
 
         line: str = input()
 
-        if line == '':
+        if line == '' or line.isspace():
             return True
-
-        # if line == 'exit':
-        #     raise EOFError
 
         ostr = self.getCmdResult(line)
 

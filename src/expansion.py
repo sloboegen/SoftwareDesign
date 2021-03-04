@@ -1,10 +1,10 @@
-def expansion(cmdline: str, state: dict[str, str]) -> str:
+def expansion(cmd: str, state: dict[str, str]) -> str:
     """
     Interpolates each variable by its value from state,
     except variable in single quotes
 
     Args:
-        cmd (str): a command name and its arguments
+        cmd (str): user input
         state (dict[str, str]): variable name -> value
 
     Returns:
@@ -12,17 +12,17 @@ def expansion(cmdline: str, state: dict[str, str]) -> str:
         variables in single quotes are not interpolated
 
     Examples:
-        >>> expansion('$a', {'a' : 1})
+        >>> expansion('echo $a', {'a' : 1})
         1
-        >>> expansion('"$a"', {'a' : 1})
-        echo 1
-        >>> expansion('\'$a\'', {'a' : 1}))
+        >>> expansion('echo "$a"', {'a' : 1})
+        1
+        >>> expansion('echo \'$a\'', {'a' : 1}))
         $a
-        >>> expansion('"\'$a\'"', {'a' : 1})
+        >>> expansion('echo "\'$a\'"', {'a' : 1})
         '1'
-        >>> expansion('\'"$a"\', {'a' : 1})
+        >>> expansion('echo \'"$a"\', {'a' : 1})
         "$a"
-        >>> expansion('$a', {})
+        >>> expansion('echo $a', {})
         empty-string
 
     """
@@ -35,7 +35,7 @@ def expansion(cmdline: str, state: dict[str, str]) -> str:
     expansed: str = ''
     curVar: str = ''
 
-    for sym in cmdline:
+    for sym in cmd:
         if sym == "'" and not inDoubleQuote:
             inSingleQuote ^= True
             continue
@@ -45,6 +45,11 @@ def expansion(cmdline: str, state: dict[str, str]) -> str:
             continue
 
         if sym == '$' and not inSingleQuote:
+            # for example, `$x$y`
+            if startVar:
+                expansed += state.setdefault(curVar, '')
+                curVar = ''
+
             startVar = True
             continue
 

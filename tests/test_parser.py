@@ -56,6 +56,9 @@ class VarDeclTestCase(unittest.TestCase):
     def test_checkDeclFalse4(self):
         self.assertDeclFalse('a=1 | echo 42')
 
+    def test_pipe(self):
+        self.assertDeclTrue('a="echo 42 | cat"')
+
     def test_checkDeclFalseChars(self):
         self.assertDeclFalse('a=|')
         self.assertDeclFalse('a=<')
@@ -66,7 +69,7 @@ class VarDeclTestCase(unittest.TestCase):
 
 class CmdTestCase(unittest.TestCase):
     def assertCmdEqual(self, line: str, name: str,
-                       args: str, keys: dict[str, str] = {}):
+                       args: list[str], keys: dict[str, str] = {}):
         def keysPrettyPrinter(keys: dict[str, str]) -> str:
             if not keys:
                 return ''
@@ -83,7 +86,9 @@ class CmdTestCase(unittest.TestCase):
 
         kpp = keysPrettyPrinter(keys)
 
-        gold = f'{name} {kpp} {args}' if kpp else f'{name} {args}'
+        argsStr: str = " ".join(args)
+
+        gold = f'{name} {kpp} {argsStr}' if kpp else f'{name} {argsStr}'
 
         self.assertEqual(str(cmd), gold)
         self.assertEqual(cmd.name, name)
@@ -92,32 +97,33 @@ class CmdTestCase(unittest.TestCase):
 
     def test_simple(self):
         line = 'echo 42'
-        self.assertCmdEqual(line, 'echo', '42')
+        self.assertCmdEqual(line, 'echo', ['42'])
 
     def test_many_params(self):
         line = 'cat README.md nonexist.py'
-        self.assertCmdEqual(line, 'cat', 'README.md nonexist.py')
+        self.assertCmdEqual(line, 'cat', ['README.md', 'nonexist.py'])
 
     def test_with_key(self):
         line = 'grep -i 42 file.txt'
-        self.assertCmdEqual(line, 'grep', '42 file.txt', {'-i': ''})
+        self.assertCmdEqual(line, 'grep', ['42', 'file.txt'], {'-i': ''})
 
     def test_with_manykeys(self):
         line = 'grep -i -w 42 README.md'
         self.assertCmdEqual(line, 'grep',
-                            '42 README.md', {'-i': '', '-w': ''})
+                            ['42', 'README.md'], {'-i': '', '-w': ''})
 
     def test_with_kv(self):
         line = 'grep -A 10 42 README.md'
         self.assertCmdEqual(line, 'grep',
-                            '42 README.md', {'-A': '10'})
+                            ['42', 'README.md'], {'-A': '10'})
 
 
 class PipesTestCase(unittest.TestCase):
     def assertPipeEqual(self, line: str, cmds: list[str]):
         result = parsePipes(line)
+
         for testing, gold in zip(result, cmds):
-            self.assertTrue(testing == gold)
+            self.assertEqual(testing, gold)
 
     def test_simple(self):
         line = 'cat file.txt | cat file2.txt'

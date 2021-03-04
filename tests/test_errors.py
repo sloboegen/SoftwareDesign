@@ -25,23 +25,15 @@ class ErrorTestCase(CmdTestCase):
     def tearDown(self) -> None:
         self.session.endSession()
 
-    def test_cat1(self):
+    def test_cat2(self):
         p = ['cat foo goo']
         self.assertErrorMsgEquals(
             p, 'cat: cat supports only one file, but given 2')
-
-    def test_cat2(self):
-        p = ['wc unknownName']
-        self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
     def test_wc1(self):
         p = ['wc foo goo']
         self.assertErrorMsgEquals(
             p, 'wc: wc supports only one file, but given 2')
-
-    def test_wc2(self):
-        p = ['wc unknownName']
-        self.assertErrorMsgEquals(p, 'wc: unknownName: no such file')
 
     def test_grep_a_null(self):
         p = ['grep -A']

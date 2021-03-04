@@ -12,22 +12,20 @@ class CmdIR:
 
     Attributes:
         name (str): the command name
-        args (str): the command args splited by whitespace.
-            `args` can contain command keys(-i, for example),
-            because each command has own keys parser
+        args (list[str]): the command args splited by whitespace.
         keys (dict[str, str]): the command keys
 
     """
 
     def __init__(self, cmd: str) -> None:
         self.name: str
-        self.args: str
+        self.args: list[str]
         self.keys: dict[str, str]
 
         self.name, self.args, self.keys = self.parseCmd(cmd)
 
     @abstractmethod
-    def parseCmd(self, cmd: str) -> tuple[str, str, dict[str, str]]:
+    def parseCmd(self, cmd: str) -> tuple[str, list[str], dict[str, str]]:
         """
         Split name, args and keys
 
@@ -44,10 +42,7 @@ class CmdIR:
 
         """
 
-        splitted = cmd.split()
-        name = splitted[0]
-        args = ' '.join(splitted[1:])
-
+        name, *args = cmd.split()
         return name, args, {}
 
     def __str__(self) -> str:
@@ -66,9 +61,9 @@ class CmdIR:
         kpp: str = keysPrettyPrinter(self.keys)
 
         if kpp:
-            return f'{self.name} {kpp} {self.args}'
+            return f'{self.name} {kpp} {" ".join(self.args)}'
 
-        return f'{self.name} {self.args}'
+        return f'{self.name} {" ".join(self.args)}'
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, CmdIR):
@@ -94,12 +89,12 @@ class GrepIR(CmdIR):
 
     def __init__(self, cmd: str) -> None:
         self.name: str
-        self.args: str
+        self.args: list[str]
         self.keys: dict[str, str]
 
         self.name, self.args, self.keys = self.parseCmd(cmd)
 
-    def parseCmd(self, cmd: str) -> tuple[str, str, dict[str, str]]:
+    def parseCmd(self, cmd: str) -> tuple[str, list[str], dict[str, str]]:
         """
         Split name, args and keys
 
@@ -108,7 +103,7 @@ class GrepIR(CmdIR):
 
         Returns:
             str: the command name
-            str: the command args
+            list[str]: the command args
             dict[str, str]: the command keys and its value
 
         Raises:
@@ -131,7 +126,7 @@ class GrepIR(CmdIR):
         name = splitted[0]
         tokens = splitted[1:]
 
-        args: str = ''
+        argsStr: str = ''
         keys: dict[str, str] = {}
 
         skipIteration = False
@@ -160,9 +155,11 @@ class GrepIR(CmdIR):
             elif tok[0] == '-':
                 raise SyntaxError(f'grep: {tok}: Unknown key')
             else:
-                args += (tok + ' ')
+                argsStr += (tok + ' ')
 
-        return name, args.rstrip(), keys
+        argsStr = argsStr.rstrip()
+
+        return name, argsStr.split(), keys
 
 
 class VarDecl:
@@ -243,15 +240,6 @@ def getCmdParser(line: str) -> CmdIR:
     return CmdIR(line)
 
 
-def createCmdIR(cmds: list[str]) -> list[CmdIR]:
-    """
-    Map suitable CmdIR to list[str]
-
-    """
-
-    return [getCmdParser(c) for c in cmds]
-
-
 def parsePipes(line: str) -> list[str]:
     """
     Split the command with a pipe
@@ -263,8 +251,36 @@ def parsePipes(line: str) -> list[str]:
         list[str]: the list of all commands between pipes
 
     """
-    cmds = line.split('|')
-    cmds = list(map(lambda c: c.rstrip(), cmds))
-    cmds = list(map(lambda c: c.lstrip(), cmds))
 
-    return cmds
+    splited: list[str] = []
+    curCmd: str = ''
+    inSingleQuote: bool = False
+    inDoubleQuote: bool = False
+
+    for sym in line:
+        if sym == '"':
+            inDoubleQuote ^= True
+            curCmd += sym
+            continue
+
+        if sym == "'":
+            inSingleQuote ^= True
+            curCmd += sym
+            continue
+
+        if sym != '|':
+            curCmd += sym
+            continue
+
+        if (sym == '|') and (inSingleQuote or inDoubleQuote):
+            curCmd += sym
+            continue
+
+        splited.append(curCmd.strip())
+        curCmd = ''
+
+    if curCmd != '':
+        splited.append(curCmd.strip())
+        curCmd = ''
+
+    return splited

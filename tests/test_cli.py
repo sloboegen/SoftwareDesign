@@ -116,6 +116,10 @@ class EchoTestCase(CmdTestCase):
         cmd = ['echo 42 | echo 43 44']
         self.assertCmdResult(cmd, '43 44')
 
+    def test_not_pipe(self):
+        cmd = ['echo "asd|asd"']
+        self.assertCmdResult(cmd, 'asd|asd')
+
 
 class PwdTestCase(CmdTestCase):
     def test_pwd(self):
@@ -168,6 +172,10 @@ class WcTestCase(CmdTestCase):
         cmd = [f'cat {p} | wc']
 
         self.assertCmdResult(cmd, '5 40 253')
+
+    def test_pipes_echo(self):
+        cmd = ['echo 123 | wc']
+        self.assertCmdResult(cmd, '1 1 4')
 
 
 class GrepTestCase(CmdTestCase):
