@@ -268,7 +268,7 @@ class GrepExecutor(CmdExecutor):
 
     def _getStreamLines(self, istream: io.StringIO) -> list[str]:
         splited = istream.getvalue().split('\n')
-        return [s + '\n' for s in splited]
+        return [f'{s}\n' for s in splited]
 
     def execute(self, istream: io.StringIO) -> io.StringIO:
         ostream = io.StringIO()
@@ -289,10 +289,11 @@ class GrepExecutor(CmdExecutor):
         for num, line in enumerate(realInput):
             if self._matchLine(line, pattern):
                 if self.aKey != 0 and fstMatch:
-                    result += '--\n'
+                    result = f'{result}--\n'
                 fstMatch = True
                 finish = min(len(realInput), num + self.aKey)
-                result += ''.join(realInput[num: finish + 1])
+                matched = ''.join(realInput[num: finish + 1])
+                result = f'{result}{matched}'
 
         ostream.write(result)
 
