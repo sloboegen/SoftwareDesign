@@ -30,10 +30,26 @@ class ErrorTestCase(CmdTestCase):
         self.assertErrorMsgEquals(
             p, 'cat: cat supports only one file, but given 2')
 
-    def test_wc2(self):
+    def test_wc1(self):
         p = ['wc foo goo']
         self.assertErrorMsgEquals(
             p, 'wc: wc supports only one file, but given 2')
+
+    def test_grep_a_null(self):
+        p = ['grep -A']
+        self.assertErrorMsgEquals(
+            p, 'grep: after "-A" key a number must be, but found nothing')
+
+    def test_grep_a_str(self):
+        p = ['grep -A str']
+        self.assertErrorMsgEquals(
+            p, 'grep: after "-A" key a number must be, but found str')
+
+    def test_grep_file(self):
+        p = ['grep -i pattern UnknownFile']
+        self.assertErrorMsgEquals(
+            p, 'grep: UnknownFile: no such file'
+        )
 
     def test_external1(self):
         p = ['ping foo']

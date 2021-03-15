@@ -1,7 +1,7 @@
 from io import StringIO
 from .executor import runCommand
 from .expansion import expansion
-from .clparser import CmdIR, parsePipes, VarDecl
+from .clparser import VarDecl, parsePipes, getCmdParser
 
 
 class Session():
@@ -42,7 +42,7 @@ class Session():
 
             return StringIO('')
 
-        cmds = [CmdIR(c) for c in expansed]
+        cmds = [getCmdParser(c) for c in expansed]
 
         try:
             ostr = runCommand(cmds)

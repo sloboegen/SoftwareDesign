@@ -5,6 +5,7 @@ import io
 import os
 import sys
 import subprocess
+import re
 
 
 class CmdExecutor(object):
@@ -17,6 +18,7 @@ class CmdExecutor(object):
     Attributes:
         name (str): the command name
         args (list): the command args
+        keys (list[str, str]): the command keys
 
     Raises:
         RuntimeError: if there is some error
@@ -29,6 +31,7 @@ class CmdExecutor(object):
     def __init__(self, cmd: CmdIR) -> None:
         self.name = cmd.name
         self.args = cmd.args
+        self.keys = cmd.keys
 
     @abstractmethod
     def execute(self, istream: io.StringIO) -> io.StringIO:
@@ -47,7 +50,7 @@ class CmdExecutor(object):
 
     @classmethod
     @abstractmethod
-    def _cmdImpl(cls, istream: IO) -> io.StringIO:
+    def _cmdImpl(cls, istream: IO, *args) -> io.StringIO:
         """
         The implementation of the concrete command
 
@@ -157,7 +160,6 @@ class WcExecutor(CmdExecutor):
     `wc FILE`: print a count of line,
     count of word, count of char in the FILE
     or the input stream, if there is no FILE
-
     """
 
     def __init__(self, cmd: CmdIR) -> None:
@@ -211,6 +213,89 @@ class WcExecutor(CmdExecutor):
         else:
             raise ValueError(
                 f'wc: wc supports only one file, but given {cntArgs}')
+
+        return ostream
+
+
+class GrepExecutor(CmdExecutor):
+    """
+    `grep pattern FILE`
+    `... | grep pattern`: prints all lines where pattern in
+
+    Attributes:
+        iKey (bool): is it need to match with case insensitive
+        wKey (bool): is it need to match a whole word
+        aKey (int): the count of strings need to print after match
+
+    """
+
+    def __init__(self, cmd: CmdIR) -> None:
+        super().__init__(cmd)
+
+        # -i: case insensitive
+        self.iKey: bool = '-i' in cmd.keys
+
+        # -w: match all word
+        self.wKey: bool = '-w' in cmd.keys
+
+        # -A n: print n lines after match
+        self.aKey = int(cmd.keys['-A']) if '-A' in cmd.keys else 0
+
+    def _matchLine(self, line: str, pattern: str) -> bool:
+        modified = line
+
+        if self.iKey:
+            pattern = pattern.lower()
+            modified = modified.lower()
+
+        if self.wKey:
+            pattern = rf'\b{pattern}\b'
+
+        regex = re.compile(rf'{pattern}')
+
+        return bool(regex.search(modified))
+
+    def _getFileLines(self, filename: str) -> list[str]:
+        result = []
+
+        try:
+            with open(filename, 'r') as f:
+                result = f.readlines()
+        except FileNotFoundError:
+            raise FileNotFoundError(f'grep: {filename}: no such file')
+
+        return result
+
+    def _getStreamLines(self, istream: io.StringIO) -> list[str]:
+        splited = istream.getvalue().split('\n')
+        return [f'{s}\n' for s in splited]
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+        splitted: list[str] = self.args
+        pattern: str = splitted[0]
+
+        realInput: list[str] = []
+
+        if len(splitted) == 2:
+            filename: str = splitted[1]
+            realInput = self._getFileLines(filename)
+        else:
+            realInput = self._getStreamLines(istream)
+
+        result: str = ''
+        fstMatch = False
+
+        for num, line in enumerate(realInput):
+            if self._matchLine(line, pattern):
+                if self.aKey != 0 and fstMatch:
+                    result = f'{result}--\n'
+                fstMatch = True
+                finish = min(len(realInput), num + self.aKey)
+                matched = ''.join(realInput[num: finish + 1])
+                result = f'{result}{matched}'
+
+        ostream.write(result)
 
         return ostream
 
@@ -278,6 +363,9 @@ def processCmd(cmd: CmdIR) -> CmdExecutor:
 
     if name == 'wc':
         return WcExecutor(cmd)
+
+    if name == 'grep':
+        return GrepExecutor(cmd)
 
     if name == 'exit':
         return ExitExecutor(cmd)

@@ -8,7 +8,7 @@ def expansion(cmd: str, state: dict[str, str]) -> str:
         state (dict[str, str]): variable name -> value
 
     Returns:
-        command where each variable replaced with its value
+        str: command where each variable replaced with its value
         variables in single quotes are not interpolated
 
     Examples:
