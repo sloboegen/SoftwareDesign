@@ -45,12 +45,3 @@ jobs:
         pip install codecov
         python -m coverage run -m unittest
         python -m codecov
-    - name: Upload token to Codecov
-      run: |
-        bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.7
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        flags: unittests
-        fail_ci_if_error: true
