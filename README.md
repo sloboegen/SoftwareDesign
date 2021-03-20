@@ -53,7 +53,7 @@ For simplify, in our CLI it's incorrect expression, it will be rejected by the p
 
 ### Commands
 
-This CLI supports five commands. They are truncated counterparts of their versions in Bash.
+This CLI supports seven commands. They are truncated counterparts of their versions in Bash.
 
 #### echo
 
@@ -85,6 +85,16 @@ Usage:
  * -i: is it need to match with case insensitive
  * -w: is it need to match a whole word
  * -A COUNT: the count of strings need to print after match
+
+#### ls
+
+`ls [FILE]` lists information about the FILEs on specified path
+    (the current directory by default).
+
+#### cd
+
+`cd [PATH]` changes working directory to specified PATH.
+    By default goes to `/home/{USERNAME}`.
 
 #### exit
 

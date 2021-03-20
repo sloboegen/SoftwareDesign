@@ -303,7 +303,8 @@ class GrepExecutor(CmdExecutor):
 
 class LsExecutor(CmdExecutor):
     """
-    `ls [FILE]`: List information about the FILEs (the current directory by default).
+    `ls [FILE]`: List information about the FILEs
+    (the current directory by default).
 
     can be used only with one file
 
@@ -328,9 +329,11 @@ class LsExecutor(CmdExecutor):
             if os.path.isfile(path) and self._hide_dots(path):
                 ostream.write(path)
             else:
-                ostream.write("\n".join(sorted(list(filter(self._hide_dots, os.listdir(path))))))
+                ostream.write("\n".join(sorted(list(filter(
+                    self._hide_dots, os.listdir(path))))))
         elif cntArgs == 0:
-            ostream.write("\n".join(sorted(list(filter(self._hide_dots, os.listdir())))))
+            ostream.write("\n".join(sorted(list(filter(
+                self._hide_dots, os.listdir())))))
         else:
             raise ValueError(
                 f'ls: ls supports only one file, but given {cntArgs}')
@@ -364,6 +367,7 @@ class CdExecutor(CmdExecutor):
                 f'cd: cd supports only one path, but given {cntArgs}')
 
         return io.StringIO()
+
 
 class ExitExecutor(CmdExecutor):
     """

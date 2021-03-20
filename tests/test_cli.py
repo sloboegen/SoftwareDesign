@@ -21,7 +21,7 @@ class CmdTestCase(unittest.TestCase):
     def assertCmdResult(self, lines: list[str], result: str) -> None:
         self.assertEqual(self._execCommands(lines), result)
 
-    def assertThrows(self, lines:list[str], result: str) -> None:
+    def assertThrows(self, lines: list[str], result: str) -> None:
         try:
             self._execCommands(lines)
         except ValueError as err:
@@ -336,7 +336,8 @@ class LsTestCase(CmdTestCase):
     def test_home(self):
         path = '~'
         cmd = [f'ls {path}']
-        gold = self.getExternalResult('ls', [str(Path.home())])  # ~ doesn't seem to go to system ls properly
+        gold = self.getExternalResult('ls', [str(Path.home())])
+        # ~ doesn't seem to go to system ls properly
 
         self.assertCmdResult(cmd, gold)
 
