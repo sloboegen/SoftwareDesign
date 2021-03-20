@@ -1,8 +1,11 @@
+import shutil
 import unittest
 import os
 import subprocess
 
 from io import StringIO
+from pathlib import Path
+
 from src.session import Session
 
 
@@ -17,6 +20,12 @@ class CmdTestCase(unittest.TestCase):
 
     def assertCmdResult(self, lines: list[str], result: str) -> None:
         self.assertEqual(self._execCommands(lines), result)
+
+    def assertThrows(self, lines:list[str], result: str) -> None:
+        try:
+            self._execCommands(lines)
+        except ValueError as err:
+            self.assertEqual(str(err), result)
 
     def _getCorrectPath(self, relPath: str) -> str:
         rp = os.path.dirname(__file__) + relPath
@@ -284,6 +293,145 @@ class GrepTestCase(CmdTestCase):
         gold = self._runGrepFile(pattern, p)
 
         self.assertCmdResult(cmd, gold)
+
+
+class LsTestCase(CmdTestCase):
+    def setUp(self) -> None:
+        self.session = Session()
+        self.cur_dir = os.getcwd()
+        make_testing_directory(self.cur_dir)
+
+    def tearDown(self) -> None:
+        self.session.endSession()
+        remove_testing_directory(self.cur_dir)
+
+    def test_local(self):
+        path = ''
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [])
+
+        self.assertCmdResult(cmd, gold)
+
+    def test_local2(self):
+        path = '.'
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [path])
+
+        self.assertCmdResult(cmd, gold)
+
+    def test_subdir(self):
+        path = 'src'
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [path])
+
+        self.assertCmdResult(cmd, gold)
+
+    def test_external(self):
+        path = '..'
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [path])
+
+        self.assertCmdResult(cmd, gold)
+
+    def test_home(self):
+        path = '~'
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [str(Path.home())])  # ~ doesn't seem to go to system ls properly
+
+        self.assertCmdResult(cmd, gold)
+
+    def test_file(self):
+        path = 'README.md'
+        cmd = [f'ls {path}']
+        gold = self.getExternalResult('ls', [path])
+
+        self.assertCmdResult(cmd, gold)
+
+
+def make_testing_directory(path):
+    testing_dir = os.path.join(path, "test")
+    testing_subdir1 = os.path.join(testing_dir, "test1")
+    testing_subdir2 = os.path.join(testing_dir, "test2")
+    file1 = os.path.join(testing_dir, "file1.txt")
+    file2 = os.path.join(testing_subdir2, "file2.txt")
+
+    os.makedirs(testing_dir, exist_ok=True)
+    os.makedirs(testing_subdir1, exist_ok=True)
+    os.makedirs(testing_subdir2, exist_ok=True)
+    with open(file1, "w") as file:
+        file.write("file1")
+
+    with open(file2, "w") as file:
+        file.write("file2")
+
+
+def remove_testing_directory(path):
+    testing_dir = os.path.join(path, "test")
+    shutil.rmtree(testing_dir)
+
+
+class CdTestCase(CmdTestCase):
+    def setUp(self) -> None:
+        self.session = Session()
+        self.cur_dir = os.getcwd()
+        self.reset = [f'cd {self.cur_dir}']
+        make_testing_directory(self.cur_dir)
+
+    def tearDown(self) -> None:
+        self.session.endSession()
+        remove_testing_directory(self.cur_dir)
+
+    def test_homing(self):
+        cmd = ['cd', 'pwd']
+
+        self.assertCmdResult(cmd, str(Path.home()))
+        self._execCommands(self.reset)
+
+    def test_folder(self):
+        gold = self.getExternalResult('ls', ['test'])
+        cmd = ['cd test', 'ls']
+
+        self.assertCmdResult(cmd, gold)
+        self._execCommands(self.reset)
+
+    def test_subfolder(self):
+        gold = self.getExternalResult('ls', ['test/test2'])
+        cmd = ['cd test/test2', 'ls']
+
+        self.assertCmdResult(cmd, gold)
+        self._execCommands(self.reset)
+
+    def test_empty_subfolder(self):
+        gold = self.getExternalResult('ls', ['test/test1'])
+        cmd = ['cd test/test1', 'ls']
+
+        self.assertCmdResult(cmd, gold)
+        self._execCommands(self.reset)
+
+    def test_there_and_back_again(self):
+        self._execCommands(['cd test'])
+        gold = self.getExternalResult('ls', ['..'])
+        smaug = self.getExternalResult('ls', ['.'])
+        cmd = ['cd ..', 'ls']
+        self.assertCmdResult(cmd, gold)
+        cmd = ['cd test', 'ls']
+
+        self.assertCmdResult(cmd, smaug)
+        self._execCommands(self.reset)
+
+    def test_file(self):
+        path = 'test/file1.txt'
+        cmd = [f'cd {path}']
+
+        self.assertThrows(cmd, f'cd: {path}: Not a directory')
+        self._execCommands(self.reset)
+
+    def test_nonex(self):
+        path = 'test/file2.txt'
+        cmd = [f'cd {path}']
+
+        self.assertThrows(cmd, f'cd: {path}: No such file or directory')
+        self._execCommands(self.reset)
 
 
 class ExternalTestCase(CmdTestCase):

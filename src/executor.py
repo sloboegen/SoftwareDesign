@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 import re
+from pathlib import Path
 
 
 class CmdExecutor(object):
@@ -300,6 +301,70 @@ class GrepExecutor(CmdExecutor):
         return ostream
 
 
+class LsExecutor(CmdExecutor):
+    """
+    `ls [FILE]`: List information about the FILEs (the current directory by default).
+
+    can be used only with one file
+
+    """
+    # The one file limit is in the spirit of the rest of the applications,
+    # I would've designed it without such limits
+
+    def __init__(self, cmd: CmdIR) -> None:
+        super().__init__(cmd)
+        self.dots = re.compile(r'(^|/)\.')
+
+    def _hide_dots(self, line):
+        return not (bool(self.dots.search(line)))
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        ostream = io.StringIO()
+        cntArgs: int = len(self.args)
+
+        if cntArgs == 1:
+            path: str = self.args[0]
+            path = os.path.expanduser(path)
+            if os.path.isfile(path) and self._hide_dots(path):
+                ostream.write(path)
+            else:
+                ostream.write("\n".join(sorted(list(filter(self._hide_dots, os.listdir(path))))))
+        elif cntArgs == 0:
+            ostream.write("\n".join(sorted(list(filter(self._hide_dots, os.listdir())))))
+        else:
+            raise ValueError(
+                f'ls: ls supports only one file, but given {cntArgs}')
+
+        return ostream
+
+
+class CdExecutor(CmdExecutor):
+    """
+    `cd [PATH]`: change working directory to specified PATH.
+
+    """
+
+    def __init__(self, cmd: CmdIR) -> None:
+        super().__init__(cmd)
+
+    def execute(self, istream: io.StringIO) -> io.StringIO:
+        cntArgs: int = len(self.args)
+
+        if cntArgs == 1:
+            path: str = self.args[0]
+            if os.path.isfile(path):
+                raise ValueError(f'cd: {path}: Not a directory')
+            if not os.path.exists(path):
+                raise ValueError(f'cd: {path}: No such file or directory')
+            os.chdir(path)
+        elif cntArgs == 0:
+            os.chdir(str(Path.home()))
+        else:
+            raise ValueError(
+                f'cd: cd supports only one path, but given {cntArgs}')
+
+        return io.StringIO()
+
 class ExitExecutor(CmdExecutor):
     """
     Stops the session
@@ -366,6 +431,12 @@ def processCmd(cmd: CmdIR) -> CmdExecutor:
 
     if name == 'grep':
         return GrepExecutor(cmd)
+
+    if name == 'ls':
+        return LsExecutor(cmd)
+
+    if name == 'cd':
+        return CdExecutor(cmd)
 
     if name == 'exit':
         return ExitExecutor(cmd)
